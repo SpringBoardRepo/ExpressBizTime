@@ -42,16 +42,35 @@ router.post('/', async (req, res, next) => {
         next(error);
     }
 })
+router.patch('/:id', async (req, res, next) => {
 
+    try {
+        const id = req.params.id;
+        const { amt } = req.body;
+        const result = await db.query(`UPDATE invoices SET amt=$1 WHERE id=$2 RETURNING *`, [amt, id]);
+        if (result.rows.length === 0) {
+            throw new ExpressError(`Invoice id ${id} Not Found`);
+        }
+        return res.json({ invoice: result.rows[0] })
+    } catch (error) {
+        next(error)
+    }
+})
 
+router.delete('/:id', async (req, res, next) => {
 
+    try {
+        const { id } = req.params;
+        const result = await db.query(`DELETE from invoices WHERE id=$1 RETURNING id`, [id]);
 
+        if (result.rows.length === 0) {
+            throw new ExpressError(`Can't find id ${id}`);
+        }
+        return res.json({ invoice: "DELETED" })
 
-
-
-
-
-
-
+    } catch (error) {
+        next(error);
+    }
+})
 
 module.exports = router;
