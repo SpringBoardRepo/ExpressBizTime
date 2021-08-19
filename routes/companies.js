@@ -25,22 +25,51 @@ router.get('/:code', async (req, res, next) => {
         next(error)
     }
 
-    router.post('/', async (req, res, next) => {
+})
 
-        try {
-            console.log("Inside try Block")
-            const { code, name, description } = req.body;
-            console.log(req.body);
-            const result = await db.query(`INSERT INTO companies (code,name,description) VALUES ($1,$2,$3) 
+router.post('/', async (req, res, next) => {
+
+    try {
+        const { code, name, description } = req.body;
+        const result = await db.query(`INSERT INTO companies (code,name,description) VALUES ($1,$2,$3) 
             RETURNING * `, [code, name, description]);
-            console.log(result);
-            return res.status(201).json({ companies: result.rows[0] });
 
-        } catch (error) {
-            console.log("Inside Catch Block")
-            next(error)
+        return res.status(201).json({ companies: result.rows[0] });
+
+    } catch (error) {
+        next(error)
+    }
+})
+
+router.patch('/:code', async (req, res, next) => {
+    try {
+        const { code } = req.params;
+        const { name, description } = req.body;
+
+        const result = await db.query(`UPDATE companies SET name=$1,description=$2 WHERE code =$3 RETURNING  * `, [name, description, code])
+
+        if (result.rows.length === 0) {
+            throw new ExpressError(`Company code ${code} Not Found`);
         }
-    })
+        return res.json({ company: result.rows[0] })
+    } catch (error) {
+        next(error)
+    }
+})
+
+router.delete('/:code', async (req, res, next) => {
+    try {
+
+        const { code } = req.params;
+        const result = await db.query(`DELETE FROM companies WHERE code=$1 RETURNING code`, [code]);
+
+        if (result.rows.length === 0) {
+            throw new ExpressError(`No Such Company ${code} Found`);
+        }
+        return res.json({ company: "DELETED" })
+    } catch (error) {
+        next(error)
+    }
 })
 
 module.exports = router;
