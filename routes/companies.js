@@ -18,7 +18,7 @@ router.get('/:code', async (req, res, next) => {
         const result = await db.query(`SELECT * FROM companies WHERE code = $1`, [code]);
         const invoicesRes = await db.query(`SELECT * from invoices WHERE comp_code =$1`, [code]);
         if (result.rows.length === 0) {
-            throw new ExpressError(`Company code ${code} Not Found`);
+            throw new ExpressError(`Company code ${code} Not Found`, 404);
         }
         const company = result.rows[0];
         const invoices = invoicesRes.rows;
@@ -52,7 +52,7 @@ router.patch('/:code', async (req, res, next) => {
         const result = await db.query(`UPDATE companies SET name=$1,description=$2 WHERE code =$3 RETURNING  * `, [name, description, code])
 
         if (result.rows.length === 0) {
-            throw new ExpressError(`Company code ${code} Not Found`);
+            throw new ExpressError(`Company code ${code} Not Found`, 404);
         }
         return res.json({ company: result.rows[0] })
     } catch (error) {
@@ -67,7 +67,7 @@ router.delete('/:code', async (req, res, next) => {
         const result = await db.query(`DELETE FROM companies WHERE code=$1 RETURNING code`, [code]);
 
         if (result.rows.length === 0) {
-            throw new ExpressError(`No Such Company ${code} Found`);
+            throw new ExpressError(`No Such Company ${code} Found`, 404);
         }
         return res.json({ company: "DELETED" })
     } catch (error) {

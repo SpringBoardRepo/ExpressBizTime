@@ -1,4 +1,4 @@
-const e = require('express');
+
 const express = require('express');
 
 const db = require('../db');
@@ -19,7 +19,7 @@ router.get('/:id', async (req, res, next) => {
         const compRes = await db.query(`SELECT * from invoices 
         JOIN companies on invoices.comp_code = companies.code WHERE id =${id}`);
         if (result.rows.length === 0) {
-            throw new ExpressError(`Invoice id ${id} not found`);
+            throw new ExpressError(`Invoice id ${id} not found`, 404);
         }
         return res.json({
             invoice: result.rows[0],
@@ -49,7 +49,7 @@ router.patch('/:id', async (req, res, next) => {
         const { amt } = req.body;
         const result = await db.query(`UPDATE invoices SET amt=$1 WHERE id=$2 RETURNING *`, [amt, id]);
         if (result.rows.length === 0) {
-            throw new ExpressError(`Invoice id ${id} Not Found`);
+            throw new ExpressError(`Invoice id ${id} Not Found`, 404);
         }
         return res.json({ invoice: result.rows[0] })
     } catch (error) {
@@ -64,7 +64,7 @@ router.delete('/:id', async (req, res, next) => {
         const result = await db.query(`DELETE from invoices WHERE id=$1 RETURNING id`, [id]);
 
         if (result.rows.length === 0) {
-            throw new ExpressError(`Can't find id ${id}`);
+            throw new ExpressError(`Can't find id ${id}`, 404);
         }
         return res.json({ invoice: "DELETED" })
 
