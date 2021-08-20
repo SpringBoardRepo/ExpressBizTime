@@ -5,7 +5,7 @@ const db = require('../db');
 const request = require('supertest');
 
 let testComp;
-beforeEach(async () => {
+beforeEach(async function () {
     let result = await db.query(`INSERT INTO companies (code,name,description) 
     VALUES ('apple', 'Apple Computer', 'Maker of OSX') RETURNING *`);
 
@@ -13,12 +13,12 @@ beforeEach(async () => {
 
 })
 
-afterEach(async () => {
-    await db.query('DELETE FROM companies')
+afterEach(async function () {
+    await db.query('DELETE FROM companies');
 
 })
 
-afterAll(async () => {
+afterAll(async function () {
     await db.end();
 })
 describe('GET /companies', function () {
